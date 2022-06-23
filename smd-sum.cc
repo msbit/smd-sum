@@ -10,26 +10,28 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  auto rom = rom_t(argv[1]);
-  if (!rom.open()) {
-    return 1;
+  for (auto i = 1; i < argc; i++) {
+    auto rom = rom_t(argv[i]);
+    if (!rom.open()) {
+      return 1;
+    }
+
+    if (!rom.get_size()) {
+      return 1;
+    }
+
+    if (!rom.get_rom_end()) {
+      return 1;
+    }
+
+    auto sum = rom.get_sum();
+
+    if (!sum) {
+      return 1;
+    }
+
+    printf("%s: 0x%04x\n", argv[i], *sum);
   }
-
-  if (!rom.get_size()) {
-    return 1;
-  }
-
-  if (!rom.get_rom_end()) {
-    return 1;
-  }
-
-  auto sum = rom.get_sum();
-
-  if (!sum) {
-    return 1;
-  }
-
-  printf("0x%04x\n", *sum);
 
   return 0;
 }
