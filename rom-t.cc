@@ -24,7 +24,7 @@ std::optional<FILE *> rom_t::open() {
 }
 
 std::optional<long> rom_t::get_size() {
-  if (fseek(*fp, 0, SEEK_END) != 0) {
+  if (!fseek_opt(*fp, 0, SEEK_END)) {
     perror(NULL);
     return {};
   }
@@ -42,7 +42,7 @@ std::optional<uint32_t> rom_t::get_rom_end() {
     return {};
   }
 
-  if (fseek(*fp, 0x1a4, SEEK_SET) != 0) {
+  if (!fseek_opt(*fp, 0x1a4, SEEK_SET)) {
     perror(NULL);
     return {};
   }
@@ -65,7 +65,7 @@ std::optional<uint32_t> rom_t::get_rom_end() {
 std::optional<uint16_t> rom_t::get_sum() {
   sum = 0;
   for (uint32_t i = 0x200; i < rom_end; i += 2) {
-    if (fseek(*fp, i, SEEK_SET) != 0) {
+    if (!fseek_opt(*fp, i, SEEK_SET)) {
       perror(NULL);
       return {};
     }
