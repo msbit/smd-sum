@@ -2,20 +2,22 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include <optional>
+
 struct rom_t {
   const char *filename;
   FILE *fp;
-  int size;
+  long size;
   int32_t rom_end;
   uint16_t sum;
 
   rom_t(const char *);
   ~rom_t();
 
-  bool open();
-  bool get_size();
-  bool get_rom_end();
-  bool get_sum();
+  std::optional<FILE *> open();
+  std::optional<long> get_size();
+  std::optional<int32_t> get_rom_end();
+  std::optional<uint16_t> get_sum();
 };
 
 int main(int argc, char **argv) {
@@ -37,11 +39,13 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  if (!rom.get_sum()) {
+  auto sum = rom.get_sum();
+
+  if (!sum) {
     return 1;
   }
 
-  printf("0x%04x\n", rom.sum);
+  printf("0x%04x\n", *sum);
 
   return 0;
 }
@@ -54,71 +58,71 @@ rom_t::~rom_t() {
   }
 }
 
-bool rom_t::open() {
+std::optional<FILE *> rom_t::open() {
   if ((fp = fopen(filename, "r")) == NULL) {
     perror(NULL);
-    return false;
+    return {};
   }
 
-  return true;
+  return fp;
 }
 
-bool rom_t::get_size() {
+std::optional<long> rom_t::get_size() {
   if (fseek(fp, 0, SEEK_END) != 0) {
     perror(NULL);
-    return false;
+    return {};
   }
 
   if ((size = ftell(fp)) == -1) {
     perror(NULL);
-    return false;
+    return {};
   }
 
-  return true;
+  return size;
 }
 
-bool rom_t::get_rom_end() {
+std::optional<int32_t> rom_t::get_rom_end() {
   if (size < 0x1a8) {
-    fprintf(stderr, "error: size 0x%x is less than 0x1a8\n", size);
-    return false;
+    fprintf(stderr, "error: size 0x%lx is less than 0x1a8\n", size);
+    return {};
   }
 
   if (fseek(fp, 0x1a4, SEEK_SET) != 0) {
     perror(NULL);
-    return false;
+    return {};
   }
 
   if (fread(&rom_end, 1, 4, fp) < 4) {
     perror(NULL);
-    return false;
+    return {};
   }
 
   rom_end = ntohl(rom_end) + 1;
   if (rom_end > size) {
-    fprintf(stderr, "error: rom end 0x%x is beyond size 0x%x\n", rom_end, size);
-    return false;
+    fprintf(stderr, "error: rom end 0x%x is beyond size 0x%lx\n", rom_end, size);
+    return {};
   }
 
-  return true;
+  return rom_end;
 }
 
-bool rom_t::get_sum() {
+std::optional<uint16_t> rom_t::get_sum() {
   sum = 0;
   for (auto i = 0x200; i < rom_end; i += 2) {
     if (fseek(fp, i, SEEK_SET) != 0) {
       perror(NULL);
-      return false;
+      return {};
     }
 
     uint16_t word;
     if (fread(&word, 1, 2, fp) < 2) {
       perror(NULL);
-      return false;
+      return {};
     }
 
     word = ntohs(word);
     sum += word;
   }
 
-  return true;
+  return sum;
 }

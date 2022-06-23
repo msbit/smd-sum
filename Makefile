@@ -1,3 +1,3 @@
-CXXFLAGS := -std=c++11 -Wall -Wextra
+CXXFLAGS := -O2 -std=c++17 -Wall -Wextra
 
 mdsum: mdsum.cc
