@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
   return 0;
 }
 
-rom_t::rom_t(const char *filename):filename(filename) {}
+rom_t::rom_t(const char *filename) : filename(filename) {}
 
 rom_t::~rom_t() {
   if (fp != NULL) {
@@ -99,7 +99,8 @@ std::optional<int32_t> rom_t::get_rom_end() {
 
   rom_end = ntohl(rom_end) + 1;
   if (rom_end > size) {
-    fprintf(stderr, "error: rom end 0x%x is beyond size 0x%lx\n", rom_end, size);
+    fprintf(stderr, "error: rom end 0x%x is beyond size 0x%lx\n", rom_end,
+            size);
     return {};
   }
 
