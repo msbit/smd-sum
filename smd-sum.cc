@@ -13,21 +13,20 @@ int main(int argc, char **argv) {
   for (auto i = 1; i < argc; i++) {
     auto rom = rom_t(argv[i]);
     if (!rom.open()) {
-      return 1;
+      continue;
     }
 
     if (!rom.get_size()) {
-      return 1;
+      continue;
     }
 
     if (!rom.get_rom_end()) {
-      return 1;
+      continue;
     }
 
     auto sum = rom.get_sum();
-
     if (!sum) {
-      return 1;
+      continue;
     }
 
     printf("%s: 0x%04x\n", argv[i], *sum);

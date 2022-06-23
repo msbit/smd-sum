@@ -17,7 +17,7 @@ rom_t::~rom_t() {
 
 std::optional<FILE *> rom_t::open() {
   if (!(fp = msbit::fopen(filename, "r"))) {
-    perror(NULL);
+    perror(filename);
   }
 
   return fp;
@@ -25,12 +25,12 @@ std::optional<FILE *> rom_t::open() {
 
 std::optional<long> rom_t::get_size() {
   if (!msbit::fseek(*fp, 0, SEEK_END)) {
-    perror(NULL);
+    perror(filename);
     return {};
   }
 
   if (!(size = msbit::ftell(*fp))) {
-    perror(NULL);
+    perror(filename);
   }
 
   return size;
@@ -38,24 +38,24 @@ std::optional<long> rom_t::get_size() {
 
 std::optional<uint32_t> rom_t::get_rom_end() {
   if (*size < 0x1a8) {
-    fprintf(stderr, "error: size 0x%lx is less than 0x1a8\n", *size);
+    fprintf(stderr, "%s: size 0x%lx is less than 0x1a8\n", filename, *size);
     return {};
   }
 
   if (!msbit::fseek(*fp, 0x1a4, SEEK_SET)) {
-    perror(NULL);
+    perror(filename);
     return {};
   }
 
   if (fread(&rom_end, 1, 4, *fp) < 4) {
-    perror(NULL);
+    perror(filename);
     return {};
   }
 
   rom_end = ntohl(rom_end) + 1;
   if (rom_end > *size) {
-    fprintf(stderr, "error: rom end 0x%x is beyond size 0x%lx\n", rom_end,
-            *size);
+    fprintf(stderr, "%s: rom end 0x%x is beyond size 0x%lx\n", filename,
+            rom_end, *size);
     return {};
   }
 
@@ -66,13 +66,13 @@ std::optional<uint16_t> rom_t::get_sum() {
   sum = 0;
   for (uint32_t i = 0x200; i < rom_end; i += 2) {
     if (!msbit::fseek(*fp, i, SEEK_SET)) {
-      perror(NULL);
+      perror(filename);
       return {};
     }
 
     uint16_t word;
     if (fread(&word, 1, 2, *fp) < 2) {
-      perror(NULL);
+      perror(filename);
       return {};
     }
 
