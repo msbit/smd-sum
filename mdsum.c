@@ -44,14 +44,18 @@ int main(int argc, char **argv) {
 bool get_size(FILE *fp, int *result, defer_t on_error){
   if (fseek(fp, 0, SEEK_END) != 0) {
     perror("fseek 1");
-    on_error(fp);
+    if (on_error) {
+      on_error(fp);
+    }
     return false;
   }
 
   *result = ftell(fp);
   if (*result == -1) {
     perror("ftell");
-    on_error(fp);
+    if (on_error) {
+      on_error(fp);
+    }
     return false;
   }
 
@@ -61,26 +65,34 @@ bool get_size(FILE *fp, int *result, defer_t on_error){
 bool get_rom_end(FILE *fp, int size, int32_t *result, defer_t on_error) {
   if (size < 0x1a8) {
     fprintf(stderr, "error: size 0x%x is less than 0x1a8\n", size);
-    on_error(fp);
+    if (on_error) {
+      on_error(fp);
+    }
     return false;
   }
 
   if (fseek(fp, 0x1a4, SEEK_SET) != 0) {
     perror("fseek 2");
-    on_error(fp);
+    if (on_error) {
+      on_error(fp);
+    }
     return false;
   }
 
   if (fread(result, 1, 4, fp) < 4) {
     perror("fread");
-    on_error(fp);
+    if (on_error) {
+      on_error(fp);
+    }
     return false;
   }
 
   *result = ntohl(*result) + 1;
   if (*result > size) {
     fprintf(stderr, "error: rom end 0x%x is beyond size 0x%x\n", *result, size);
-    on_error(fp);
+    if (on_error) {
+      on_error(fp);
+    }
     return false;
   }
 
@@ -93,13 +105,17 @@ bool get_sum(FILE *fp, int32_t rom_end, uint16_t *result, defer_t on_error) {
     uint16_t word;
     if (fseek(fp, i, SEEK_SET) != 0) {
       perror("fseek");
-      on_error(fp);
+      if (on_error) {
+        on_error(fp);
+      }
       return false;
     }
 
     if (fread(&word, 1, 2, fp) < 2) {
       perror("fread");
-      on_error(fp);
+      if (on_error) {
+        on_error(fp);
+      }
       return false;
     }
 
