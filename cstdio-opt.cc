@@ -2,8 +2,9 @@
 
 #include <optional>
 
-std::optional<FILE *> fopen_opt(const char *path, const char *mode) {
-  auto result = fopen(path, mode);
+namespace msbit {
+std::optional<FILE *> fopen(const char *path, const char *mode) {
+  auto result = std::fopen(path, mode);
   if (result == NULL) {
     return {};
   }
@@ -11,8 +12,8 @@ std::optional<FILE *> fopen_opt(const char *path, const char *mode) {
   return result;
 }
 
-std::optional<unsigned int> fseek_opt(FILE *stream, long offset, int whence) {
-  auto result = fseek(stream, offset, whence);
+std::optional<unsigned int> fseek(FILE *stream, long offset, int whence) {
+  auto result = std::fseek(stream, offset, whence);
   if (result == -1) {
     return {};
   }
@@ -20,11 +21,12 @@ std::optional<unsigned int> fseek_opt(FILE *stream, long offset, int whence) {
   return result;
 }
 
-std::optional<unsigned long> ftell_opt(FILE *stream) {
-  auto result = ftell(stream);
+std::optional<unsigned long> ftell(FILE *stream) {
+  auto result = std::ftell(stream);
   if (result == -1) {
     return {};
   }
 
   return result;
 }
+} // namespace msbit
